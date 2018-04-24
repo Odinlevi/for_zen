@@ -7,8 +7,8 @@ import time
 from time import sleep
 
 sender = 'maximiliannikiforov@mail.ru'
-destination = 'maximiliannikiforov@gmail.com'
-#destination = 'Zenonius@gmail.com'
+#destination = 'maximiliannikiforov@gmail.com'
+destination = 'Zenonius@gmail.com'
 
 try:
     file = open('hrefs.txt', 'r')

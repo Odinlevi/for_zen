@@ -7,7 +7,8 @@ import time
 from time import sleep
 
 sender = 'maximiliannikiforov@mail.ru'
-destination = 'Zenonius@gmail.com'
+destination = 'maximiliannikiforov@gmail.com'
+#destination = 'Zenonius@gmail.com'
 
 try:
     file = open('hrefs.txt', 'r')
@@ -35,6 +36,13 @@ if tags != ['']:
         etc = soup.find_all("a", class_="item-description-title-link")
         for hrefs in etc:
             url = part1 + hrefs.get('href')
+            if finder.find('$') != -1:
+                price_txt = hrefs.findNext("div", class_="about ").get_text().replace('руб.', '').replace('Цена не указана', '0').replace('\n', '').replace(' ', '')
+                
+                #print('{} : {}'.format(int(finder[finder.find('$')+1 : ]),int(price_txt)))
+                if int(finder[finder.find('$')+1 : ]) < int(price_txt):
+                    continue
+                print(int(price_txt))
             #print(url)
             f_r = open('hrefs.txt', 'r')
             f_cont = f_r.read()
@@ -60,7 +68,11 @@ if tags != ['']:
                 time.sleep(30)
     for finder in tags:
         part1 = 'https://youla.ru'
-        lenta = 'https://youla.ru/?q='+finder
+        if finder.find('$') == -1:
+            lenta = 'https://youla.ru/?q='+finder
+        else:
+            lenta='https://youla.ru/?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q='+finder[:finder.find('$')]
+            print(lenta)
         page = urllib.request.urlopen(lenta)
         soup = BeautifulSoup(page.read(), "html.parser")
         f_li = soup.find_all("li", class_="product_item")

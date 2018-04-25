@@ -30,20 +30,31 @@ except:
 if tags != ['']:
     for finder in tags:
         part1 = 'https://www.avito.ru'
-        lenta = 'https://www.avito.ru/rossiya?q='+finder
+        if finder.find('@') != -1:
+            semn = finder.find('@')
+            if finder[semn+1] == '1':
+                region = 'moskva'
+            elif finder[semn+1] == '2':
+                region = 'moskovskaya_oblast'
+            finder = finder.replace(finder[semn]+finder[semn+1], '')
+        else:
+            region = 'rossiya'
+        if finder.find('$') != -1:
+            price_max = int(finder[finder.find('$')+1 : ])
+            finder = finder[:-finder.find('$')]
+        else:
+            price_max = 0
+        #print(finder)
+        lenta = 'https://www.avito.ru/'+region+'?q='+finder
         page = urllib.request.urlopen(lenta)
         soup = BeautifulSoup(page.read(), "html.parser")
         etc = soup.find_all("a", class_="item-description-title-link")
         for hrefs in etc:
             url = part1 + hrefs.get('href')
-            if finder.find('$') != -1:
+            if price_max != 0:
                 price_txt = hrefs.findNext("div", class_="about ").get_text().replace('руб.', '').replace('Цена не указана', '0').replace('\n', '').replace(' ', '')
-                
-                #print('{} : {}'.format(int(finder[finder.find('$')+1 : ]),int(price_txt)))
-                if int(finder[finder.find('$')+1 : ]) < int(price_txt):
+                if price_max < int(price_txt):
                     continue
-                print(int(price_txt))
-            #print(url)
             f_r = open('hrefs.txt', 'r')
             f_cont = f_r.read()
             f_r.close()
@@ -64,22 +75,24 @@ if tags != ['']:
                 f_w = open('hrefs.txt', 'a')
                 f_w.write(url+'\n')
                 f_w.close()
-                print("Sended: "+url)
-                time.sleep(30)
+            print("Sended: "+url)
+            break
+            time.sleep(30)
     for finder in tags:
         part1 = 'https://youla.ru'
+        if finder.find('@') != -1:
+            finder = finder.replace(finder[finder.find('@')]+finder[finder.find('@')+1], '')
         if finder.find('$') == -1:
             lenta = 'https://youla.ru/?q='+finder
         else:
             lenta='https://youla.ru/?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q='+finder[:finder.find('$')]
-            print(lenta)
+            finder = finder[:-finder.find('$')]
         page = urllib.request.urlopen(lenta)
         soup = BeautifulSoup(page.read(), "html.parser")
         f_li = soup.find_all("li", class_="product_item")
         for hrefs in f_li:
             etc = hrefs.find_next("a")
             url = part1 + etc.get('href')
-            #print(url)
             f_r = open('hrefs.txt', 'r')
             f_cont = f_r.read()
             f_r.close()
@@ -100,5 +113,5 @@ if tags != ['']:
                 f_w = open('hrefs.txt', 'a')
                 f_w.write(url+'\n')
                 f_w.close()
-                print("Sended: "+url)
-                time.sleep(30)
+            print("Sended: "+url)
+            time.sleep(30)

@@ -75,9 +75,8 @@ if tags != ['']:
                 f_w = open('hrefs.txt', 'a')
                 f_w.write(url+'\n')
                 f_w.close()
-            print("Sended: "+url)
-            break
-            time.sleep(30)
+                print("Sended: "+url)            
+                time.sleep(30)
     for finder in tags:
         part1 = 'https://youla.ru'
         if finder.find('@') != -1:
@@ -113,5 +112,5 @@ if tags != ['']:
                 f_w = open('hrefs.txt', 'a')
                 f_w.write(url+'\n')
                 f_w.close()
-            print("Sended: "+url)
-            time.sleep(30)
+                print("Sended: "+url)
+                time.sleep(30)

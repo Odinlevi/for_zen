@@ -7,8 +7,8 @@ import time
 from time import sleep
 
 sender = 'maximiliannikiforov@mail.ru'
-destination = 'maximiliannikiforov@gmail.com'
-#destination = 'Zenonius@gmail.com'
+#destination = 'maximiliannikiforov@gmail.com'
+destination = 'Zenonius@gmail.com'
 
 try:
     file = open('hrefs.txt', 'r')
@@ -59,15 +59,14 @@ if tags != ['']:
         for hrefs in etc:
             url = part1 + hrefs.get('href')
             if price_max != 0:
+                price_txt = hrefs.findNext("div", class_="about ").get_text().replace('руб.', '').replace('Цена не указана', '0').replace('\n', '').replace(' ', '')
                 if price_min != 0:
-                    price_txt = hrefs.findNext("div", class_="about ").get_text().replace('руб.', '').replace('Цена не указана', '0').replace('\n', '').replace(' ', '')
                     if price_min >= int(price_txt) or price_max <= int(price_txt):
                         continue
                 else:
                     if price_max <= int(price_txt):
                         continue
-            print(url)
-            '''
+            #print(url)
             f_r = open('hrefs.txt', 'r')
             f_cont = f_r.read()
             f_r.close()
@@ -97,14 +96,19 @@ if tags != ['']:
         if finder.find('$') == -1:
             lenta = 'https://youla.ru/?q='+finder
         else:
-            lenta='https://youla.ru/?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q='+finder[:finder.find('$')]
+            if finder.find(':') != -1:
+                lenta='https://youla.ru/?attributes[price][from]='+finder[finder.find('$')+1 : finder.find(':')]+'00&attributes[price][to]='+finder[finder.find(':')+1 : ]+'00&q='+finder[:finder.find('$')]
+            else:
+                lenta='https://youla.ru/?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q='+finder[:finder.find('$')]
             finder = finder[:-finder.find('$')]
+        #print(lenta)
         page = urllib.request.urlopen(lenta)
         soup = BeautifulSoup(page.read(), "html.parser")
         f_li = soup.find_all("li", class_="product_item")
         for hrefs in f_li:
             etc = hrefs.find_next("a")
             url = part1 + etc.get('href')
+            #print(url)
             f_r = open('hrefs.txt', 'r')
             f_cont = f_r.read()
             f_r.close()
@@ -126,4 +130,4 @@ if tags != ['']:
                 f_w.write(url+'\n')
                 f_w.close()
                 print("Sended: "+url)
-                time.sleep(30)'''
+                time.sleep(30)

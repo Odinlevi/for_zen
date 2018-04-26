@@ -7,8 +7,8 @@ import time
 from time import sleep
 
 sender = 'maximiliannikiforov@mail.ru'
-#destination = 'maximiliannikiforov@gmail.com'
-destination = 'Zenonius@gmail.com'
+destination = 'maximiliannikiforov@gmail.com'
+#destination = 'Zenonius@gmail.com'
 
 try:
     file = open('hrefs.txt', 'r')
@@ -40,10 +40,17 @@ if tags != ['']:
         else:
             region = 'rossiya'
         if finder.find('$') != -1:
-            price_max = int(finder[finder.find('$')+1 : ])
+            if finder.find(':') != -1:
+                price_min = int(finder[finder.find('$')+1 : finder.find(':')])
+                price_max = int(finder[finder.find(':')+1 : ])
+            else:
+                price_max = int(finder[finder.find('$')+1 : ])
+                price_min = 0
             finder = finder[:-finder.find('$')]
         else:
+            price_min = 0
             price_max = 0
+        #print(price_min, ' ', price_max)
         #print(finder)
         lenta = 'https://www.avito.ru/'+region+'?q='+finder
         page = urllib.request.urlopen(lenta)
@@ -52,9 +59,15 @@ if tags != ['']:
         for hrefs in etc:
             url = part1 + hrefs.get('href')
             if price_max != 0:
-                price_txt = hrefs.findNext("div", class_="about ").get_text().replace('руб.', '').replace('Цена не указана', '0').replace('\n', '').replace(' ', '')
-                if price_max < int(price_txt):
-                    continue
+                if price_min != 0:
+                    price_txt = hrefs.findNext("div", class_="about ").get_text().replace('руб.', '').replace('Цена не указана', '0').replace('\n', '').replace(' ', '')
+                    if price_min >= int(price_txt) or price_max <= int(price_txt):
+                        continue
+                else:
+                    if price_max <= int(price_txt):
+                        continue
+            print(url)
+            '''
             f_r = open('hrefs.txt', 'r')
             f_cont = f_r.read()
             f_r.close()
@@ -75,7 +88,7 @@ if tags != ['']:
                 f_w = open('hrefs.txt', 'a')
                 f_w.write(url+'\n')
                 f_w.close()
-                print("Sended: "+url)            
+                print("Sended: "+url)
                 time.sleep(30)
     for finder in tags:
         part1 = 'https://youla.ru'
@@ -113,4 +126,4 @@ if tags != ['']:
                 f_w.write(url+'\n')
                 f_w.close()
                 print("Sended: "+url)
-                time.sleep(30)
+                time.sleep(30)'''

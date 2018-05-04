@@ -9,8 +9,8 @@ from time import sleep
 
 # Here are emails, which are need for script's work
 sender = 'maximiliannikiforov@mail.ru'
-destination = 'maximiliannikiforov@gmail.com'
-#destination = 'Zenonius@gmail.com'
+#destination = 'maximiliannikiforov@gmail.com'
+destination = 'Zenonius@gmail.com'
 
 # Here is beginnig of work with files and all the instructions
 try:
@@ -38,7 +38,6 @@ except:
 if tags != ['']:
     # Avito.ru
     for finder in tags:
-        url_list = 'Avito.ru:\n'
         part1 = 'https://www.avito.ru'
         # If you typed the sign @, I'll change the region
         if finder.find('@') != -1:
@@ -60,6 +59,7 @@ if tags != ['']:
                 lenta='https://www.avito.ru/'+region+'?pmax='+finder[finder.find('$')+1 : ]+'&q={0}&i=1'.format(quote(finder[:finder.find('$')]))
             finder = finder[:finder.find('$')]
         # Beginning of work with the site www.Avito.ru
+        url_list = 'Avito.ru, item - '+finder+':\n'
         try:
             page = urllib.request.urlopen(lenta)
         except:
@@ -86,7 +86,6 @@ if tags != ['']:
             print('There is no such item on Avito.ru now - '+finder)
     # Youla.ru
     for finder in tags:
-        url_list = url_list+'Youla.ru:\n'
         part1 = 'https://youla.ru'
         # If you typed the sign @, I'll change the region
         region = ''
@@ -103,6 +102,7 @@ if tags != ['']:
                 lenta='https://youla.ru/'+region+'?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q={0}'.format(quote(finder[:finder.find('$')]))
             finder = finder[:finder.find('$')]
         # Beginning of work with the site www.Youla.ru
+        url_list = url_list+'Youla.ru, item - '+finder+':\n'
         page = urllib.request.urlopen(lenta)
         soup = BeautifulSoup(page.read(), "html.parser")
         f_li = soup.find_all("li", class_="product_item")

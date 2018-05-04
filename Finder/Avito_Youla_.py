@@ -9,8 +9,8 @@ from time import sleep
 
 # Here are emails, which are need for script's work
 sender = 'maximiliannikiforov@mail.ru'
-destination = 'maximiliannikiforov@gmail.com'
-#destination = 'Zenonius@gmail.com'
+#destination = 'maximiliannikiforov@gmail.com'
+destination = 'Zenonius@gmail.com'
 
 # Here is beginnig of work with files and all the instructions
 try:
@@ -38,6 +38,7 @@ except:
 if tags != ['']:
     # Avito.ru
     for finder in tags:
+        url_list = 'Avito.ru:\n'
         part1 = 'https://www.avito.ru'
         # If you typed the sign @, I'll change the region
         if finder.find('@') != -1:
@@ -77,33 +78,14 @@ if tags != ['']:
             f_cont = f_r.read()
             f_r.close()
             if f_cont.find(url) == -1:
-                # If this is a new link, I'll send you an email
-                smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
-                smtpObj.ehlo()
-                smtpObj.starttls()
-                # Yeah, it's my password
-                smtpObj.login(sender,'nelyublyuparoli')
-                msg = "\r\n".join([
-                  "From: "+sender,
-                  "To: "+destination,
-                  "Subject: URL",
-                  "",
-                  url
-                  ])
-                smtpObj.sendmail(sender,destination,msg)
-                smtpObj.quit()
-                f_w = open('hrefs.txt', 'a', encoding="utf-8")
-                f_w.write(url+'\n')
-                f_w.close()
+                url_list = url_list+url+'\n'
                 count += 1
-                # Nice!
-                print("Sended: "+url)
-                #break
-                time.sleep(30)
         if count == 0:
+            url_list = url_list+'There is no such item on Avito.ru now - '+finder
             print('There is no such item on Avito.ru now - '+finder)
     # Youla.ru
     for finder in tags:
+        url_list = url_list+'Youla.ru:\n'
         part1 = 'https://youla.ru'
         # If you typed the sign @, I'll change the region
         region = ''
@@ -135,27 +117,27 @@ if tags != ['']:
             f_cont = f_r.read()
             f_r.close()
             if f_cont.find(url) == -1:
-                # If this is a new link, I'll send you an email
-                smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
-                smtpObj.ehlo()
-                smtpObj.starttls()
-                # Yeah, it is the same... Or not?
-                smtpObj.login(sender,'nelyublyuparoli')
-                msg = "\r\n".join([
-                  "From: "+sender,
-                  "To: "+destination,
-                  "Subject: URL",
-                  "",
-                  url
-                  ])
-                smtpObj.sendmail(sender,destination,msg)
-                smtpObj.quit()
+                url_list = url_list+url+'\n'
                 f_w = open('hrefs.txt', 'a', encoding="utf-8")
                 f_w.write(url+'\n')
                 f_w.close()
                 count += 1
-                print("Sended: "+url)
-                # Nice!
-                time.sleep(30)
         if count == 0:
+            url_list = url_list+'There is no such item on Youla.ru now - '+finder
             print('There is no such item on Youla.ru now - '+finder)
+    # Email sending
+    smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
+    smtpObj.ehlo()
+    smtpObj.starttls()
+    # Yeah, it is my password... Or not?
+    smtpObj.login(sender,'nelyublyuparoli')
+    msg = "\r\n".join([
+        "From: "+sender,
+        "To: "+destination,
+        "Subject: URL",
+        "",
+        url_list
+        ])
+    smtpObj.sendmail(sender,destination,msg)
+    smtpObj.quit()
+    print("Sended: "+url_list)

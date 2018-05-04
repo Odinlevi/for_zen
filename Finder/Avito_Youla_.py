@@ -6,11 +6,12 @@ import sys
 import smtplib
 import time
 from time import sleep
+from transliterate import translit, get_available_language_codes
 
 # Here are emails, which are need for script's work
 sender = 'maximiliannikiforov@mail.ru'
-#destination = 'maximiliannikiforov@gmail.com'
-destination = 'Zenonius@gmail.com'
+destination = 'maximiliannikiforov@gmail.com'
+#destination = 'Zenonius@gmail.com'
 
 # Here is beginnig of work with files and all the instructions
 try:
@@ -64,7 +65,7 @@ if tags != ['']:
             page = urllib.request.urlopen(lenta)
         except:
             url_list = url_list+'There is no such item on Avito.ru now - '+finder+'\n'
-            print('There is no such item on Avito.ru now - '+finder)
+            #print('There is no such item on Avito.ru now - '+finder)
             continue
         soup = BeautifulSoup(page.read(), "html.parser")
         etc = soup.find_all("a", class_="item-description-title-link")
@@ -83,7 +84,7 @@ if tags != ['']:
                 count += 1
         if count == 0:
             url_list = url_list+'There is no such item on Avito.ru now - '+finder+'\n'
-            print('There is no such item on Avito.ru now - '+finder)
+            #print('There is no such item on Avito.ru now - '+finder)
     # Youla.ru
     for finder in tags:
         part1 = 'https://youla.ru'
@@ -125,20 +126,21 @@ if tags != ['']:
                 count += 1
         if count == 0:
             url_list = url_list+'There is no such item on Youla.ru now - '+finder+'\n'
-            print('There is no such item on Youla.ru now - '+finder)
+            #print('There is no such item on Youla.ru now - '+finder)
     # Email sending
     smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
     smtpObj.ehlo()
     smtpObj.starttls()
     # Yeah, it is my password... Or not?
     smtpObj.login(sender,'nelyublyuparoli')
+    sng = translit(url_list, 'ru', reversed=True)
     msg = "\r\n".join([
         "From: "+sender,
         "To: "+destination,
         "Subject: URL",
         "",
-        url_list
+        sng
         ])
-    smtpObj.sendmail(sender,destination,msg)
+    smtpObj.sendmail(sender,destination,msg.replace('\ufeff', ''))
     smtpObj.quit()
-    print("Sended: "+url_list)
+    print("Sended: "+sng)

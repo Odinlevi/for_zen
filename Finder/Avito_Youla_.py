@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+import urllib
 import urllib.request, socket
 from urllib.parse import quote
 import requests
@@ -10,8 +11,8 @@ from transliterate import translit, get_available_language_codes
 
 # Here are emails, which are need for script's work
 sender = 'maximiliannikiforov@mail.ru'
-destination = 'maximiliannikiforov@gmail.com'
-#destination = 'Zenonius@gmail.com'
+#destination = 'maximiliannikiforov@gmail.com'
+destination = 'Zenonius@gmail.com'
 
 # Here is beginnig of work with files and all the instructions
 try:
@@ -23,7 +24,7 @@ except:
     file.close
 try:
     f_tags = open('tags.txt', 'r', encoding="utf-8")
-    tags = f_tags.read().split('\n')
+    tags = f_tags.read().replace('\n\n\n', '').replace('\n\n', '').split('\n')
 except:
     print('Please, create file "tags.txt" and fill it with tags;\n'
           '!!!! Every tag must be splitted by "\\n"\n'
@@ -35,6 +36,7 @@ except:
           'Second is used for definition of price limits in rubles\n'
           'You can type 1000 (max price) or 500:1000 (min and max prices)')
     sys.exit()
+global_count = 0
 # I found the file tags.txt, so shall we begin
 if tags != ['']:
     # Avito.ru
@@ -52,12 +54,12 @@ if tags != ['']:
             region = 'rossiya'
         # If you typed the sign $, I'll change the price limits
         if finder.find('$') == -1:
-            lenta = 'https://www.avito.ru/'+region+'?q={0}&i=1'.format(quote(finder))
+            lenta = 'https://www.avito.ru/'+region+'?q={0}&i=1'.format(quote(finder.replace('\ufeff', '')))
         else:
             if finder.find(':') != -1:
-                lenta='https://www.avito.ru/'+region+'?pmin='+finder[finder.find('$')+1 : finder.find(':')]+'&pmax='+finder[finder.find(':')+1 : ]+'&q={0}&i=1'.format(quote(finder[:finder.find('$')]))
+                lenta='https://www.avito.ru/'+region+'?pmin='+finder[finder.find('$')+1 : finder.find(':')]+'&pmax='+finder[finder.find(':')+1 : ]+'&q={0}&i=1'.format(quote(finder[:finder.find('$')].replace('\ufeff', '')))
             else:
-                lenta='https://www.avito.ru/'+region+'?pmax='+finder[finder.find('$')+1 : ]+'&q={0}&i=1'.format(quote(finder[:finder.find('$')]))
+                lenta='https://www.avito.ru/'+region+'?pmax='+finder[finder.find('$')+1 : ]+'&q={0}&i=1'.format(quote(finder[:finder.find('$')].replace('\ufeff', '')))
             finder = finder[:finder.find('$')]
         # Beginning of work with the site www.Avito.ru
         url_list = 'Avito.ru, item - '+finder+':\n'
@@ -81,7 +83,11 @@ if tags != ['']:
             f_r.close()
             if f_cont.find(url) == -1:
                 url_list = url_list+url+'\n'
+                f_w = open('hrefs.txt', 'a', encoding="utf-8")
+                f_w.write(url+'\n')
+                f_w.close()
                 count += 1
+                global_count += 1
         if count == 0:
             url_list = url_list+'There is no such item on Avito.ru now - '+finder+'\n'
             #print('There is no such item on Avito.ru now - '+finder)
@@ -95,12 +101,12 @@ if tags != ['']:
             region = 'moskva'
         # If you typed the sign $, I'll change the price limits
         if finder.find('$') == -1:
-            lenta = 'https://youla.ru/?q={0}'.format(quote(finder))
+            lenta = 'https://youla.ru/?q={0}'.format(quote(finder.replace('\ufeff', '')))
         else:
             if finder.find(':') != -1:
-                lenta='https://youla.ru/'+region+'?attributes[price][from]='+finder[finder.find('$')+1 : finder.find(':')]+'00&attributes[price][to]='+finder[finder.find(':')+1 : ]+'00&q={0}'.format(quote(finder[:finder.find('$')]))
+                lenta='https://youla.ru/'+region+'?attributes[price][from]='+finder[finder.find('$')+1 : finder.find(':')]+'00&attributes[price][to]='+finder[finder.find(':')+1 : ]+'00&q={0}'.format(quote(finder[:finder.find('$')].replace('\ufeff', '')))
             else:
-                lenta='https://youla.ru/'+region+'?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q={0}'.format(quote(finder[:finder.find('$')]))
+                lenta='https://youla.ru/'+region+'?attributes[price][to]='+finder[finder.find('$')+1 : ]+'00&q={0}'.format(quote(finder[:finder.find('$')].replace('\ufeff', '')))
             finder = finder[:finder.find('$')]
         # Beginning of work with the site www.Youla.ru
         url_list = url_list+'Youla.ru, item - '+finder+':\n'
@@ -124,23 +130,25 @@ if tags != ['']:
                 f_w.write(url+'\n')
                 f_w.close()
                 count += 1
+                global_count += 1
         if count == 0:
             url_list = url_list+'There is no such item on Youla.ru now - '+finder+'\n'
             #print('There is no such item on Youla.ru now - '+finder)
-    # Email sending
-    smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
-    smtpObj.ehlo()
-    smtpObj.starttls()
-    # Yeah, it is my password... Or not?
-    smtpObj.login(sender,'nelyublyuparoli')
     sng = translit(url_list, 'ru', reversed=True)
-    msg = "\r\n".join([
-        "From: "+sender,
-        "To: "+destination,
-        "Subject: URL",
-        "",
-        sng
-        ])
-    smtpObj.sendmail(sender,destination,msg.replace('\ufeff', ''))
-    smtpObj.quit()
+    if global_count != 0:
+        # Email sending
+        smtpObj = smtplib.SMTP('smtp.mail.ru', 587)
+        smtpObj.ehlo()
+        smtpObj.starttls()
+        # Yeah, it is my password... Or not?
+        smtpObj.login(sender,'nelyublyuparoli')
+        msg = "\r\n".join([
+            "From: "+sender,
+            "To: "+destination,
+            "Subject: URL",
+            "",
+            sng
+            ])
+        smtpObj.sendmail(sender,destination,msg.replace('\ufeff', ''))
+        smtpObj.quit()
     print("Sended: "+sng)

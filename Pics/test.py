@@ -20,22 +20,23 @@ def http(href):
             return(0)
         except:
             return(-1)
-
-img_hrefv1 = 'кфс-кольцова-центр-регион.рф'
-img_href = img_hrefv1
-if check_cyrill(img_href) == 0:
-    img_parts = img_href.split('.')
-    img_href = ''
-    for img_part in img_parts:
-        img_href += str(img_part.encode('punycode')).replace("b'", "xn--").replace("'", ".")
-    img_href = img_href[:-1]
-if http(img_href):
-    img_href = 'http://'+img_href
-elif http(img_href) == 0:
-    img_href = 'https://'+img_href
-else:
-    print('BAD URL: '+img_href)
-print(img_href)
+def change_st_part(hrefv1):
+    #hrefv1 = 'кфс-кольцова-центр-регион.рф'
+    href = hrefv1
+    if check_cyrill(href) == 0:
+        parts = href.split('.')
+        href = ''
+        for part in parts:
+            href += str(part.encode('punycode')).replace("b'", "xn--").replace("'", ".")
+        href = href[:-1]
+    if http(href):
+        href = 'http://'+href
+    elif http(href) == 0:
+        href = 'https://'+href
+    else:
+        print('BAD URL: '+href)
+    return (href)
+print(change_st_part('центр-регион-кфскольцова.рф'))
 '''
 resource = urllib.request.urlopen(img_href)
 out = open('imgg.jpg', 'wb') # 'imgg.jpg' -> page url

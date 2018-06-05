@@ -1,6 +1,6 @@
 import urllib.request
 from urllib.parse import quote
-#from PIL import Image, ImageOps
+from PIL import Image, ImageOps
 import ssl
 ssl.match_hostname = lambda cert, hostname: True
 

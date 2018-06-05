@@ -3,6 +3,9 @@ import json
 import crawler
 import sys
 import ssl
+import urllib.request
+from urllib.parse import quote
+from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 ssl.match_hostname = lambda cert, hostname: True
 
@@ -49,14 +52,14 @@ except:
     sys.exit()
 config = {}
 #href_list = {'http://kfs-ok.com', 'http://kfskorektor.cz', 'http://кфс-кольцова-центр-регион.рф'}'''
-x = '1' 
+x = 1
 '''for href in hrefs_list:
     if href.find('https') == -1:
         href = 'http://'+href
     print(href)'''
 config = {}
-sitemap_name = 'sitemap'+x+'.xml'
-x=str(int(x)+1)
+sitemap_name = 'sitemap'+str(x)+'.xml'
+x+=1
 href = 'центр-регион-кфскольцова.рф'
 hrefv1 = href
 href = change_st_part(href)
@@ -85,4 +88,28 @@ file = open(sitemap_name, 'r', encoding="utf-8")
 soup = BeautifulSoup(file, "html.parser")
 locs = soup.find_all("loc")
 for loc in locs:
-    print(loc.get_text())
+    loc = loc.get_text()
+    xx = 0
+    if xx == 0:
+        loc = loc + '/'
+    page = urllib.request.urlopen(loc)
+    sup = BeautifulSoup(page.read(), "html.parser")
+    img_hrefs = sup.findAll('img')
+    for img_href in img_hrefs:
+        xx += 1
+        img_href = img_href.get('src')
+        resource = urllib.request.urlopen(img_href)
+        img_name = loc+str(xx)+".jpg"
+        img_name = img_name.replace('/', '')
+        out = open(img_name, 'wb') # 'imgg.jpg' -> page url
+        out.write(resource.read())
+        out.close()
+        img = Image.open(img_name)
+        img = img.convert("RGB")
+        w, h = img.size
+        hh = 300 * h / w
+        avatar_size = (300, int(hh))
+
+        method = Image.NEAREST if img.size == avatar_size else Image.ANTIALIAS
+        formatted_img = ImageOps.fit(img, avatar_size, method = method, centering = (1.0,0.0))
+        formatted_img.save(img_name)

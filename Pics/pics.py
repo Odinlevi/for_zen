@@ -1,5 +1,5 @@
 from __future__ import print_function, division, absolute_import
-from PIL import Image as pImage
+from PIL import Image
 import numpy
 import os
 
@@ -7,9 +7,9 @@ BLOCK_SIZE = 20
 TRESHOLD = 60
 
 def load_image(selfy):
-    img = pImage.open(selfy)
+    img = Image.open(selfy)
     small = img.resize( (BLOCK_SIZE, BLOCK_SIZE),
-    pImage.BILINEAR )
+    Image.BILINEAR )
     t_data = numpy.array(
         [sum(list(x)) for x in small.getdata()]
     )
